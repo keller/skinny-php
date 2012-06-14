@@ -1,0 +1,4 @@
+RewriteEngine On
+
+RewriteCond %{REQUEST_URI} !/assets/
+RewriteRule ^ index.php [QSA,L]
