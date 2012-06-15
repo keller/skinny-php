@@ -40,17 +40,20 @@ class skinnyApp {
         $action = $request['action'];
         $return = call_user_func_array($action, $matches);
 
-        // return from route is outputted as json, with an optional callback
-        $return = json_encode($return);
-        if (isset($_GET['callback'])) {
-          $content_type = "application/javascript";
-          $return = "{$_GET['callback']}($return);";
+        if (isset($return)) {
+
+          // return from route is outputted as json, with an optional callback
+          $return = json_encode($return);
+          if (isset($_GET['callback'])) {
+            $content_type = "application/javascript";
+            $return = "{$_GET['callback']}($return);";
+          }
+          else {
+            $content_type = "application/json";
+          }
+          header("Content-Type: $content_type");
+          echo $return;
         }
-        else {
-          $content_type = "application/json";
-        }
-        header("Content-Type: $content_type");
-        echo $return;
         exit;
       }
     }
