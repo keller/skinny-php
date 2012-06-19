@@ -1,15 +1,23 @@
 <?php
 
 class skinnyApp {
-  private $get_requests = array();
-  private $post_requests = array();
+  private $get_routes = array();
+  private $post_routes = array();
 
-  public function get($route, $action) {
-    $this->get_requests[] = array('route' => $route, 'action' => $action);
+  public function get($path, $action, $version = null) {
+    $route = array('path' => $path, 'action' => $action);
+    if (isset($version)) {
+      $route['version'] = $version;
+    }
+    $this->get_routes[] = $route;
   }
 
-  public function post($route, $action) {
-    $this->post_requests[] = array('route' => $route, 'action' => $action);
+  public function post($path, $action, $version = null) {
+    $route = array('path' => $path, 'action' => $action);
+    if (isset($version)) {
+      $route['version'] = $version;
+    }
+    $this->post_routes[] = $route;
   }
 
   public function not_found() {
@@ -25,19 +33,40 @@ class skinnyApp {
     if (strpos($url, '?') !== false) {
       $url = substr($url, 0, strpos($url, '?'));
     }
+    // get api version
+    if (preg_match('/^\/(\d+)\//', $url, $matches)) {
+      $url = preg_replace('/^\/'.$matches[1].'/', '', $url);
+      $api_version = (int) $matches[1];
+    }
 
-    $requests = ($_SERVER['REQUEST_METHOD'] === 'GET') ? $this->get_requests : $this->post_requests;
+    $routes = ($_SERVER['REQUEST_METHOD'] === 'GET') ? $this->get_routes : $this->post_routes;
+    // filter out any routes for other versions
+    if (isset($api_version)) {
+      $routes = array_filter($routes, function($route) use ($api_version) {
+        if (isset($route['version'])) {
+          if (is_array($route['version'])) {
+            return (in_array($api_version, $route['version']));
+          }
+          else {
+            return ($route['version'] === $api_version);
+          }
+        }
+        else {
+          return true;
+        }
+      });
+    }
 
-    foreach($requests as $request) {
-      $route = $request['route'];
-      $route = str_replace('/', '\/', $route);
-      $route = '^' . $route . '\/?$';
+    foreach($routes as $route) {
+      $path = $route['path'];
+      $path = str_replace('/', '\/', $path);
+      $path = '^' . $path . '\/?$';
 
-      if (preg_match("/$route/i", $url, $matches)) {
+      if (preg_match("/$path/i", $url, $matches)) {
         // remove full match
         array_shift($matches);
 
-        $action = $request['action'];
+        $action = $route['action'];
         $return = call_user_func_array($action, $matches);
 
         if (isset($return)) {
