@@ -26,7 +26,11 @@ class skinnyApp {
     echo "Not Found";
   }
 
-  public function render() {
+  public function __destruct() {
+    $this->render();
+  }
+
+  private function render() {
     $location = preg_replace('/\/index\.php$/', '', $_SERVER['SCRIPT_NAME']);
     $location = str_replace('/', '\/', $location);
     $url = preg_replace("/^$location/", '', $_SERVER['REQUEST_URI']);

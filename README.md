@@ -20,5 +20,3 @@ A simple app might look something like:
     $app->get('/hello/(.*)', function($name) {
       return "Hello $name!";
     });
-
-    $app->render();

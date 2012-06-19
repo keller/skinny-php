@@ -10,5 +10,3 @@ $app->get('/', function() {
 $app->get('/hello/(.*)', function($name) {
   return "Hello $name!";
 });
-
-$app->render();
