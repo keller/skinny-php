@@ -5,14 +5,14 @@ class skinnyApp {
   private $post_routes = array();
 
   public function get($path, $action, $version = null) {
-    $this->add_request('get', $path, $action, $version);
+    $this->add_route('get', $path, $action, $version);
   }
 
   public function post($path, $action, $version = null) {
-    $this->add_request('post', $path, $action, $version);
+    $this->add_route('post', $path, $action, $version);
   }
 
-  private function add_request($method, $path, $action, $version) {
+  private function add_route($method, $path, $action, $version) {
     $route = array('path' => $path, 'action' => $action);
     if (isset($version)) {
       $route['version'] = $version;
@@ -66,8 +66,7 @@ class skinnyApp {
         // remove full match
         array_shift($matches);
 
-        $action = $route['action'];
-        $return = call_user_func_array($action, $matches);
+        $return = call_user_func_array($route['action'], $matches);
 
         if (isset($return)) {
 
